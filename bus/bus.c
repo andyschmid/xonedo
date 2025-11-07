@@ -250,6 +250,9 @@ static void gip_register_client(struct work_struct *work)
 	dev_set_name(&client->dev, "gip%d.%u", client->adapter->id, client->id);
 
 	err = device_register(&client->dev);
+
+	pr_debug("%s: name: %s, parent: %s", __func__, dev_name(&client->dev), dev_name(client->dev.parent));
+
 	if (err)
 		dev_err(&client->dev, "%s: register failed: %d\n",
 			__func__, err);
