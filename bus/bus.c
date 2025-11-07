@@ -7,6 +7,7 @@
 #include <linux/slab.h>
 #include <linux/idr.h>
 #include <linux/version.h>
+#include <linux/delay.h>
 
 #include "bus.h"
 
@@ -242,6 +243,11 @@ static void gip_register_client(struct work_struct *work)
 	struct gip_client *client = container_of(work, typeof(*client),
 						 work_register);
 	int err;
+
+	while(client->dev.driver_data == 0)
+	{
+		msleep(1);
+	}
 
 	client->dev.parent = &client->adapter->dev;
 	client->dev.type = &gip_client_type;
