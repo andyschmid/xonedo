@@ -146,6 +146,7 @@ struct gip_gamepad {
 
 static void gip_gamepad_send_rumble(struct timer_list *timer)
 {
+	pr_debug("TRACE: %s", __func__);
 	// from_timer() has been renamed to timer_container_of() in linux 6.16
 	struct gip_gamepad_rumble *rumble =
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(6,16,0)
@@ -169,6 +170,7 @@ static void gip_gamepad_send_rumble(struct timer_list *timer)
 static int gip_gamepad_queue_rumble(struct input_dev *dev, void *data,
 				    struct ff_effect *effect)
 {
+	pr_debug("TRACE: %s", __func__);
 	struct gip_gamepad_rumble *rumble = input_get_drvdata(dev);
 	u32 mag_left = effect->u.rumble.strong_magnitude;
 	u32 mag_right = effect->u.rumble.weak_magnitude;
@@ -193,6 +195,7 @@ static int gip_gamepad_queue_rumble(struct input_dev *dev, void *data,
 
 static int gip_gamepad_init_rumble(struct gip_gamepad *gamepad)
 {
+	pr_debug("TRACE: %s", __func__);
 	struct gip_gamepad_rumble *rumble = &gamepad->rumble;
 	struct input_dev *dev = gamepad->input.dev;
 
@@ -214,11 +217,13 @@ static int gip_gamepad_init_rumble(struct gip_gamepad *gamepad)
 
 static int gip_gamepad_init_extra_data(struct gip_gamepad *gamepad)
 {
+	pr_debug("TRACE: %s", __func__);
 	return gip_init_extra_data(gamepad->client);
 }
 
 static void gip_gamepad_query_paddles(struct gip_gamepad *gamepad)
 {
+	pr_debug("TRACE: %s", __func__);
 	struct gip_hardware hardware = gamepad->client->hardware;
 
 	gamepad->paddle_support = PADDLE_NONE;
@@ -253,6 +258,7 @@ static void gip_gamepad_query_paddles(struct gip_gamepad *gamepad)
 
 static int gip_gamepad_init_input(struct gip_gamepad *gamepad)
 {
+	pr_debug("TRACE: %s", __func__);
 	struct input_dev *dev = gamepad->input.dev;
 	int err;
 
@@ -321,6 +327,7 @@ static int gip_gamepad_op_battery(struct gip_client *client,
 				  enum gip_battery_type type,
 				  enum gip_battery_level level)
 {
+	pr_debug("TRACE: %s", __func__);
 	struct gip_gamepad *gamepad = dev_get_drvdata(&client->dev);
 
 	gip_report_battery(&gamepad->battery, type, level);
@@ -331,6 +338,7 @@ static int gip_gamepad_op_battery(struct gip_client *client,
 static int gip_gamepad_op_authenticate(struct gip_client *client,
 				       void *data, u32 len)
 {
+	pr_debug("TRACE: %s", __func__);
 	struct gip_gamepad *gamepad = dev_get_drvdata(&client->dev);
 
 	return gip_auth_process_pkt(&gamepad->auth, data, len);
@@ -338,6 +346,7 @@ static int gip_gamepad_op_authenticate(struct gip_client *client,
 
 static int gip_gamepad_op_guide_button(struct gip_client *client, bool down)
 {
+	pr_debug("TRACE: %s", __func__);
 	struct gip_gamepad *gamepad = dev_get_drvdata(&client->dev);
 
 	input_report_key(gamepad->input.dev, BTN_MODE, down);
@@ -348,12 +357,14 @@ static int gip_gamepad_op_guide_button(struct gip_client *client, bool down)
 
 static int gip_gamepad_op_authenticated(struct gip_client *client)
 {
+	pr_debug("TRACE: %s", __func__);
 	return 0;
 }
 
 static int gip_gamepad_op_firmware(struct gip_client *client, void *data,
 				   u32 len)
 {
+	pr_debug("TRACE: %s", __func__);
 	// First, ensure the data is of the correct size.
 	struct gip_gamepad_pkt_firmware *pkt = data;
 	if (len < sizeof(*pkt))
@@ -474,6 +485,7 @@ static int gip_gamepad_op_input(struct gip_client *client, void *data, u32 len)
 
 static int gip_gamepad_probe(struct gip_client *client)
 {
+	pr_debug("TRACE: %s", __func__);
 	struct gip_gamepad *gamepad;
 	int err;
 

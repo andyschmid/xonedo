@@ -163,6 +163,7 @@ static int gip_auth_send_pkt(struct gip_auth *auth,
 			     enum gip_auth_command_handshake cmd,
 			     void *pkt, u16 len)
 {
+	pr_debug("TRACE: %s", __func__);
 	struct gip_auth_header_full *hdr = pkt;
 	u16 data_len = len - sizeof(hdr->handshake) - GIP_AUTH_TRAILER_LEN;
 
@@ -186,6 +187,7 @@ static int gip_auth_send_pkt(struct gip_auth *auth,
 static int gip_auth_request_pkt(struct gip_auth *auth,
 				enum gip_auth_command_handshake cmd, u16 len)
 {
+	pr_debug("TRACE: %s", __func__);
 	struct gip_auth_request req = {};
 	u16 data_len = len + sizeof(struct gip_auth_header_data);
 
@@ -199,6 +201,7 @@ static int gip_auth_request_pkt(struct gip_auth *auth,
 
 static int gip_auth2_send_hello(struct gip_auth *auth)
 {
+	pr_debug("TRACE: %s", __func__);
 	struct gip_auth2_pkt_host_hello pkt = {};
 
 	get_random_bytes(auth->random_host, sizeof(auth->random_host));
@@ -211,6 +214,7 @@ static int gip_auth2_send_hello(struct gip_auth *auth)
 static int gip_auth2_handle_pkt_hello(struct gip_auth *auth,
 				      void *data, u32 len)
 {
+	pr_debug("TRACE: %s", __func__);
 	struct gip_auth2_pkt_client_hello *pkt = data;
 
 	if (len < sizeof(*pkt))
@@ -225,6 +229,7 @@ static int gip_auth2_handle_pkt_hello(struct gip_auth *auth,
 static int gip_auth2_handle_pkt_certificate(struct gip_auth *auth,
 					    void *data, u32 len)
 {
+	pr_debug("TRACE: %s", __func__);
 	struct gip_auth2_pkt_client_cert *pkt = data;
 
 	if (len < sizeof(*pkt))
@@ -243,6 +248,7 @@ static int gip_auth2_handle_pkt_certificate(struct gip_auth *auth,
 static int gip_auth2_handle_pkt_pubkey(struct gip_auth *auth,
 				       void *data, u32 len)
 {
+	pr_debug("TRACE: %s", __func__);
 	struct gip_auth2_pkt_client_pubkey *pkt = data;
 
 	if (len < sizeof(*pkt))
@@ -256,6 +262,7 @@ static int gip_auth2_handle_pkt_pubkey(struct gip_auth *auth,
 
 static void gip_auth2_exchange_ecdh(struct work_struct *work)
 {
+	pr_debug("TRACE: %s", __func__);
 	struct gip_auth *auth = container_of(work, typeof(*auth),
 					     work_exchange_ecdh);
 	struct gip_auth2_pkt_host_pubkey pkt = {};
@@ -295,6 +302,7 @@ static void gip_auth2_exchange_ecdh(struct work_struct *work)
 
 static int gip_auth_send_pkt_hello(struct gip_auth *auth)
 {
+	pr_debug("TRACE: %s", __func__);
 	struct gip_auth_pkt_host_hello pkt = {};
 
 	get_random_bytes(auth->random_host, sizeof(auth->random_host));
@@ -307,6 +315,7 @@ static int gip_auth_send_pkt_hello(struct gip_auth *auth)
 static int gip_auth_send_pkt_finish(struct gip_auth *auth,
 				    enum gip_auth_command_handshake cmd)
 {
+	pr_debug("TRACE: %s", __func__);
 	struct gip_auth_pkt_host_finish pkt = {};
 	u8 transcript[GIP_AUTH_TRANSCRIPT_LEN];
 	int err;
@@ -334,6 +343,7 @@ static int gip_auth_send_pkt_finish(struct gip_auth *auth,
 
 static int gip_auth_handle_pkt_acknowledge(struct gip_auth *auth)
 {
+	pr_debug("TRACE: %s, last_sent_command = %d", __func__, auth->last_sent_command);
 	switch (auth->last_sent_command) {
 	case GIP_AUTH2_CMD_HOST_HELLO:
 		return gip_auth_request_pkt(auth, GIP_AUTH2_CMD_CLIENT_HELLO,
@@ -359,6 +369,7 @@ static int gip_auth_handle_pkt_acknowledge(struct gip_auth *auth)
 static int gip_auth_handle_pkt_hello(struct gip_auth *auth,
 				     void *data, u32 len)
 {
+	pr_debug("TRACE: %s", __func__);
 	struct gip_auth_pkt_client_hello *pkt = data;
 
 	if (len < sizeof(*pkt))
@@ -373,6 +384,7 @@ static int gip_auth_handle_pkt_hello(struct gip_auth *auth,
 static int gip_auth_handle_pkt_certificate(struct gip_auth *auth,
 					   void *data, u32 len)
 {
+	pr_debug("TRACE: %s", __func__);
 	/* ASN.1 SEQUENCE (len = 0x04 + 0x010a) */
 	u8 asn1_seq[] = { 0x30, 0x82, 0x01, 0x0a };
 	int i;
@@ -406,6 +418,7 @@ static int gip_auth_handle_pkt_certificate(struct gip_auth *auth,
 static int gip_auth_handle_pkt_finish(struct gip_auth *auth,
 				      void *data, u32 len)
 {
+	pr_debug("TRACE: %s", __func__);
 	struct gip_auth_pkt_client_finish *pkt = data;
 	u8 transcript[GIP_AUTH_TRANSCRIPT_LEN];
 	u8 finished[GIP_AUTH_TRANSCRIPT_LEN];
@@ -445,6 +458,7 @@ static int gip_auth_handle_pkt_finish(struct gip_auth *auth,
 
 static void gip_auth_exchange_rsa(struct work_struct *work)
 {
+	pr_debug("TRACE: %s", __func__);
 	struct gip_auth *auth = container_of(work, typeof(*auth),
 					     work_exchange_rsa);
 	struct gip_auth_pkt_host_secret pkt = {};
@@ -489,6 +503,7 @@ static void gip_auth_exchange_rsa(struct work_struct *work)
 
 int gip_auth_send_complete(struct gip_client *client)
 {
+	pr_debug("TRACE: %s", __func__);
 	struct gip_auth_header_control hdr = {};
 
 	hdr.context = GIP_AUTH_CTX_CONTROL;
@@ -500,6 +515,7 @@ EXPORT_SYMBOL_GPL(gip_auth_send_complete);
 
 static void gip_auth_complete_handshake(struct work_struct *work)
 {
+	pr_debug("TRACE: %s", __func__);
 	struct gip_auth *auth = container_of(work, typeof(*auth),
 					     work_complete);
 	u8 random[GIP_AUTH_RANDOM_LEN * 2];
@@ -542,6 +558,7 @@ static int gip_auth_dispatch_pkt(struct gip_auth *auth,
 				 enum gip_auth_command_handshake cmd,
 				 void *data, u32 len)
 {
+	pr_debug("TRACE: %s, cmd = %d", __func__, cmd);
 	switch (cmd) {
 	case GIP_AUTH2_CMD_CLIENT_HELLO:
 		return gip_auth2_handle_pkt_hello(auth, data, len);
@@ -564,6 +581,7 @@ static int gip_auth_dispatch_pkt(struct gip_auth *auth,
 
 static int gip_auth_process_pkt_data(struct gip_auth *auth, void *data, u32 len)
 {
+	pr_debug("TRACE: %s", __func__);
 	struct gip_auth_header_full *hdr = data;
 	int err;
 
@@ -590,6 +608,7 @@ static int gip_auth_process_pkt_data(struct gip_auth *auth, void *data, u32 len)
 
 int gip_auth_process_pkt(struct gip_auth *auth, void *data, u32 len)
 {
+	pr_debug("TRACE: %s", __func__);
 	struct gip_auth_header_handshake *hdr = data;
 
 	if (!auth->client)
@@ -616,6 +635,7 @@ EXPORT_SYMBOL_GPL(gip_auth_process_pkt);
 
 static void gip_auth_release(void *res)
 {
+	pr_debug("TRACE: %s", __func__);
 	struct gip_auth *auth = res;
 
 	cancel_work_sync(&auth->work_exchange_rsa);
@@ -634,6 +654,8 @@ static void gip_auth_release(void *res)
 
 int gip_auth_start_handshake(struct gip_auth *auth, struct gip_client *client)
 {
+	pr_debug("TRACE: %s", __func__);
+
 	struct shash_desc *shash_transcript, *shash_prf;
 	int err;
 

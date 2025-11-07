@@ -112,6 +112,7 @@ static void xone_dongle_prep_packet(struct xone_dongle_client *client,
 				    struct sk_buff *skb,
 				    enum xone_dongle_queue queue)
 {
+	pr_debug("TRACE: %s", __func__);
 	struct ieee80211_qos_hdr hdr = {};
 	struct mt76_txwi txwi = {};
 	u8 data[] = {
@@ -152,6 +153,7 @@ static void xone_dongle_prep_packet(struct xone_dongle_client *client,
 static int xone_dongle_get_buffer(struct gip_adapter *adap,
 				  struct gip_adapter_buffer *buf)
 {
+	pr_debug("TRACE: %s", __func__);
 	struct xone_dongle_client *client = dev_get_drvdata(&adap->dev);
 	struct xone_dongle_skb_cb *cb;
 	struct urb *urb;
@@ -184,6 +186,7 @@ static int xone_dongle_get_buffer(struct gip_adapter *adap,
 static int xone_dongle_submit_buffer(struct gip_adapter *adap,
 				     struct gip_adapter_buffer *buf)
 {
+	pr_debug("TRACE: %s", __func__);
 	struct xone_dongle_client *client = dev_get_drvdata(&adap->dev);
 	struct xone_dongle_skb_cb *cb;
 	struct sk_buff *skb = buf->context;
@@ -219,6 +222,7 @@ static int xone_dongle_submit_buffer(struct gip_adapter *adap,
 static int xone_dongle_set_encryption_key(struct gip_adapter *adap,
 					  u8 *key, int len)
 {
+	pr_debug("TRACE: %s", __func__);
 	struct xone_dongle_client *client = dev_get_drvdata(&adap->dev);
 
 	return xone_mt76_set_client_key(&client->dongle->mt, client->wcid,
@@ -233,6 +237,7 @@ static struct gip_adapter_ops xone_dongle_adapter_ops = {
 
 static int xone_dongle_toggle_pairing(struct xone_dongle *dongle, bool enable)
 {
+	pr_debug("TRACE: %s", __func__);
 	struct usb_interface *intf = to_usb_interface(dongle->mt.dev);
 	enum xone_mt76_led_mode led;
 	int err = 0;
@@ -278,6 +283,7 @@ err_unlock:
 
 static void xone_dongle_pairing_timeout(struct work_struct *work)
 {
+	pr_debug("TRACE: %s", __func__);
 	struct xone_dongle *dongle = container_of(to_delayed_work(work),
 						  typeof(*dongle),
 						  pairing_work);
@@ -296,6 +302,7 @@ static ssize_t xone_dongle_pairing_show(struct device *dev,
 					struct device_attribute *attr,
 					char *buf)
 {
+	pr_debug("TRACE: %s", __func__);
 	struct usb_interface *intf = to_usb_interface(dev);
 	struct xone_dongle *dongle = usb_get_intfdata(intf);
 
@@ -306,6 +313,7 @@ static ssize_t xone_dongle_pairing_store(struct device *dev,
 					 struct device_attribute *attr,
 					 const char *buf, size_t count)
 {
+	pr_debug("TRACE: %s", __func__);
 	struct usb_interface *intf = to_usb_interface(dev);
 	struct xone_dongle *dongle = usb_get_intfdata(intf);
 	bool enable;
@@ -342,6 +350,7 @@ ATTRIBUTE_GROUPS(xone_dongle);
 static struct xone_dongle_client *
 xone_dongle_create_client(struct xone_dongle *dongle, u8 *addr)
 {
+	pr_debug("TRACE: %s", __func__);
 	struct xone_dongle_client *client;
 	int i, err;
 
@@ -376,6 +385,7 @@ xone_dongle_create_client(struct xone_dongle *dongle, u8 *addr)
 
 static int xone_dongle_add_client(struct xone_dongle *dongle, u8 *addr)
 {
+	pr_debug("TRACE: %s", __func__);
 	struct xone_dongle_client *client;
 	int err;
 	unsigned long flags;
@@ -415,6 +425,7 @@ err_free_client:
 
 static int xone_dongle_remove_client(struct xone_dongle *dongle, u8 wcid)
 {
+	pr_debug("TRACE: %s", __func__);
 	struct xone_dongle_client *client;
 	int err;
 	unsigned long flags;
@@ -450,6 +461,7 @@ static int xone_dongle_remove_client(struct xone_dongle *dongle, u8 wcid)
 
 static int xone_dongle_pair_client(struct xone_dongle *dongle, u8 *addr)
 {
+	pr_debug("TRACE: %s", __func__);
 	int err;
 
 	dev_dbg(dongle->mt.dev, "%s: address=%pM\n", __func__, addr);
@@ -464,6 +476,7 @@ static int xone_dongle_pair_client(struct xone_dongle *dongle, u8 *addr)
 static int xone_dongle_enable_client_encryption(struct xone_dongle *dongle,
 						u8 wcid)
 {
+	pr_debug("TRACE: %s", __func__);
 	struct xone_dongle_client *client;
 	u8 data[] = { 0x00, 0x00 };
 	int err;
@@ -569,6 +582,7 @@ static int xone_dongle_handle_qos_data(struct xone_dongle *dongle,
 
 static int xone_dongle_handle_association(struct xone_dongle *dongle, u8 *addr)
 {
+	pr_debug("TRACE: %s", __func__);
 	struct xone_dongle_event *evt;
 
 	evt = xone_dongle_alloc_event(dongle, XONE_DONGLE_EVT_ADD_CLIENT);
@@ -585,6 +599,7 @@ static int xone_dongle_handle_association(struct xone_dongle *dongle, u8 *addr)
 static int xone_dongle_handle_disassociation(struct xone_dongle *dongle,
 					     u8 wcid)
 {
+	pr_debug("TRACE: %s", __func__);
 	struct xone_dongle_event *evt;
 
 	if (!wcid || wcid > XONE_DONGLE_MAX_CLIENTS)
@@ -605,6 +620,7 @@ static int xone_dongle_handle_client_command(struct xone_dongle *dongle,
 					     struct sk_buff *skb,
 					     u8 wcid, u8 *addr)
 {
+	pr_debug("TRACE: %s", __func__);
 	struct xone_dongle_event *evt;
 	enum xone_dongle_event_type evt_type;
 
@@ -639,6 +655,7 @@ static int xone_dongle_handle_client_command(struct xone_dongle *dongle,
 
 static int xone_dongle_handle_button(struct xone_dongle *dongle)
 {
+	pr_debug("TRACE: %s", __func__);
 	struct xone_dongle_event *evt;
 
 	evt = xone_dongle_alloc_event(dongle, XONE_DONGLE_EVT_ENABLE_PAIRING);
@@ -653,6 +670,7 @@ static int xone_dongle_handle_button(struct xone_dongle *dongle)
 static int xone_dongle_handle_loss(struct xone_dongle *dongle,
 				   struct sk_buff *skb)
 {
+	pr_debug("TRACE: %s", __func__);
 	u8 wcid;
 
 	if (skb->len < sizeof(wcid))
@@ -896,6 +914,7 @@ static int xone_dongle_fw_requester(const struct firmware **fw,
 				    struct xone_dongle *dongle,
 				    const char *fwname)
 {
+	pr_debug("TRACE: %s", __func__);
 	struct device *dev = dongle->mt.dev;
 	int err;
 
@@ -919,6 +938,7 @@ static int xone_dongle_fw_requester(const struct firmware **fw,
 
 static void xone_dongle_fw_load(struct work_struct *work)
 {
+	pr_debug("TRACE: %s", __func__);
 	struct xone_dongle *dongle =
 		container_of(work, struct xone_dongle, load_fw_work);
 
@@ -999,6 +1019,7 @@ static void xone_dongle_fw_load(struct work_struct *work)
 
 static int xone_dongle_init(struct xone_dongle *dongle)
 {
+	pr_debug("TRACE: %s", __func__);
 	init_usb_anchor(&dongle->urbs_out_idle);
 	init_usb_anchor(&dongle->urbs_out_busy);
 	init_usb_anchor(&dongle->urbs_in_idle);
@@ -1011,6 +1032,7 @@ static int xone_dongle_init(struct xone_dongle *dongle)
 
 static int xone_dongle_power_off_clients(struct xone_dongle *dongle)
 {
+	pr_debug("TRACE: %s", __func__);
 	struct xone_dongle_client *client;
 	int i;
 	int err = 0;
@@ -1047,6 +1069,7 @@ static int xone_dongle_power_off_clients(struct xone_dongle *dongle)
 
 static void xone_dongle_destroy(struct xone_dongle *dongle)
 {
+	pr_debug("TRACE: %s", __func__);
 	struct xone_dongle_client *client;
 	struct urb *urb;
 	int i;
@@ -1093,6 +1116,7 @@ static void xone_dongle_destroy(struct xone_dongle *dongle)
 static int xone_dongle_probe(struct usb_interface *intf,
 			     const struct usb_device_id *id)
 {
+	pr_debug("TRACE: %s", __func__);
 	struct xone_dongle *dongle;
 	int err;
 
@@ -1138,6 +1162,7 @@ static int xone_dongle_probe(struct usb_interface *intf,
 
 static void xone_dongle_disconnect(struct usb_interface *intf)
 {
+	pr_debug("TRACE: %s", __func__);
 	struct xone_dongle *dongle = usb_get_intfdata(intf);
 	int err;
 
@@ -1155,6 +1180,7 @@ static void xone_dongle_disconnect(struct usb_interface *intf)
 
 static int xone_dongle_suspend(struct usb_interface *intf, pm_message_t message)
 {
+	pr_debug("TRACE: %s", __func__);
 	struct xone_dongle *dongle = usb_get_intfdata(intf);
 	int err;
 
@@ -1177,6 +1203,7 @@ static int xone_dongle_suspend(struct usb_interface *intf, pm_message_t message)
 
 static int xone_dongle_resume(struct usb_interface *intf)
 {
+	pr_debug("TRACE: %s", __func__);
 	struct xone_dongle *dongle = usb_get_intfdata(intf);
 	struct urb *urb;
 	int err;
@@ -1205,6 +1232,7 @@ static void xone_dongle_shutdown(struct device *dev)
 static void xone_dongle_shutdown(struct usb_interface *intf)
 {
 #endif
+	pr_debug("TRACE: %s", __func__);
 	struct xone_dongle *dongle = usb_get_intfdata(intf);
 	int err;
 
@@ -1222,6 +1250,7 @@ static void xone_dongle_shutdown(struct usb_interface *intf)
 
 static int xone_dongle_pre_reset(struct usb_interface *intf)
 {
+	pr_debug("TRACE: %s", __func__);
 	struct xone_dongle *dongle = usb_get_intfdata(intf);
 	struct urb *urb;
 
@@ -1252,6 +1281,7 @@ static int xone_dongle_pre_reset(struct usb_interface *intf)
 
 static int xone_dongle_post_reset(struct usb_interface *intf)
 {
+	pr_debug("TRACE: %s", __func__);
 	struct xone_dongle *dongle = usb_get_intfdata(intf);
 
 	pr_debug("%s", __func__);
@@ -1266,6 +1296,7 @@ static int xone_dongle_post_reset(struct usb_interface *intf)
 
 static int xone_dongle_reset_resume(struct usb_interface *intf)
 {
+	pr_debug("TRACE: %s", __func__);
 	struct xone_dongle *dongle = usb_get_intfdata(intf);
 	int err;
 
